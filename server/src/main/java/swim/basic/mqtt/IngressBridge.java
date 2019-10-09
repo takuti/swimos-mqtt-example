@@ -70,7 +70,7 @@ public class IngressBridge {
   }
 
   public static void main(String[] args) throws MqttException {
-    final IngressBridge lis = new IngressBridge("warp://localhost:9001", "tcp://iot.eclipse.org:1883");
+    final IngressBridge lis = new IngressBridge("warp://localhost:9001", "tcp://localhost:1883");
     lis.listen();
   }
 }
