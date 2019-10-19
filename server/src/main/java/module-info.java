@@ -17,6 +17,7 @@ open module swim.basic {
   requires swim.server;
   requires swim.client;
   requires org.eclipse.paho.client.mqttv3;
+  requires org.json;
   requires java.xml.bind;
   exports swim.basic;
 }

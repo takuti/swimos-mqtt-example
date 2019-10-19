@@ -19,7 +19,6 @@ import swim.basic.mqtt.ssl.SSLUtils;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
@@ -59,11 +58,12 @@ public class DataSourcePopulator {
     int count = 0;
     while (true) {
       for (int i = 0; i < 10; i++) {
-        final String content = String.format("@msg{id:%d,val:FromPopulator%d}", i, count++);
-        MqttMessage message = new MqttMessage(content.getBytes());
-        message.setQos(qos);
+        final String payload = new JSONObject()
+                .put("id", i)
+                .put("val", String.format("FromPopulator%d", count++))
+                .toString();
         try {
-          mqtt.publish(topic, message);
+          mqtt.publish(topic, payload.getBytes(), qos, false);
           // Don't lower this value unless you use a personal MQTT broker, or
           // you will get rate-limited!!
           Thread.sleep(10000);

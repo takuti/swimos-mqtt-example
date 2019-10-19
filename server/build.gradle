@@ -35,6 +35,7 @@ dependencies {
   api group: 'org.swimos', name: 'swim-server', version: version
   api group: 'org.swimos', name: 'swim-client', version: version
   api group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.0.2'
+  implementation "org.json:json:20190722"
   // JAX-B dependencies for JDK 9+
   implementation "javax.xml.bind:jaxb-api:2.3.1"
 }
