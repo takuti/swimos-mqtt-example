@@ -2,5 +2,5 @@
 .gradle
 build
 out
-Listener-*1883/
-Writer-*1883/
+Listener-*/
+Writer-*/
