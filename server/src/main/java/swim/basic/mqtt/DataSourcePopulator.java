@@ -21,7 +21,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONObject;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -31,21 +30,16 @@ public class DataSourcePopulator {
 
   public final MqttClient mqtt;
 
-  public DataSourcePopulator(String broker) throws MqttException, GeneralSecurityException, IOException {
-    this(broker, false, null, null, null, null);
+  public DataSourcePopulator(String broker) throws MqttException {
+    this(broker, null);
   }
 
-  public DataSourcePopulator(String broker, boolean ssl, String username, String password, String clientCert, String privateKey) throws MqttException, GeneralSecurityException, IOException {
+  public DataSourcePopulator(String broker, MqttConnectOptions connOpts) throws MqttException {
     this.mqtt = new MqttClient(broker, "Writer");
 
-    MqttConnectOptions connOpts = new MqttConnectOptions();
-    connOpts.setCleanSession(true);
-
-    if (ssl) {
-      SSLContext context = SSLUtils.loadSSLContext(clientCert, privateKey);
-      connOpts.setSocketFactory(context.getSocketFactory());
-      connOpts.setUserName(username);
-      connOpts.setPassword(password.toCharArray());
+    if (connOpts == null) {
+      connOpts = new MqttConnectOptions();
+      connOpts.setCleanSession(true);
     }
 
     System.out.println("Populator connecting to " + broker);
@@ -87,7 +81,7 @@ public class DataSourcePopulator {
       String password = prop.getProperty("mqtt.password");
       String clientCert = prop.getProperty("mqtt.clientcert");
       String privateKey = prop.getProperty("mqtt.privatekey");
-      pop = new DataSourcePopulator(broker, true, username, password, clientCert, privateKey);
+      pop = new DataSourcePopulator(broker, SSLUtils.loadMqttConnectOptions(username, password, clientCert, privateKey));
     } else {
       pop = new DataSourcePopulator(broker);
     }

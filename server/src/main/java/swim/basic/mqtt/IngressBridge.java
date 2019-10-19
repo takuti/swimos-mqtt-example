@@ -25,7 +25,6 @@ import swim.client.ClientRuntime;
 import swim.recon.Recon;
 import swim.structure.Value;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -67,23 +66,14 @@ public class IngressBridge {
   }
 
   public void connect() throws MqttException {
-    MqttConnectOptions connOpts = new MqttConnectOptions();
-    connOpts.setCleanSession(true);
-    this.mqtt.connect(connOpts);
-    // Spin until connected
-    while (!this.mqtt.isConnected()) { }
-    System.out.println("Connected!");
+    connect(null);
   }
 
-  public void connectSSL(String username, String password, String clientCert, String privateKey) throws MqttException, GeneralSecurityException, IOException {
-    SSLContext context = SSLUtils.loadSSLContext(clientCert, privateKey);
-
-    MqttConnectOptions connOpts = new MqttConnectOptions();
-    connOpts.setCleanSession(true);
-    connOpts.setSocketFactory(context.getSocketFactory());
-    connOpts.setUserName(username);
-    connOpts.setPassword(password.toCharArray());
-
+  public void connect(MqttConnectOptions connOpts) throws MqttException {
+    if (connOpts == null) {
+        connOpts = new MqttConnectOptions();
+        connOpts.setCleanSession(true);
+    }
     this.mqtt.connect(connOpts);
     // Spin until connected
     while (!this.mqtt.isConnected()) { }
@@ -109,7 +99,7 @@ public class IngressBridge {
       String password = prop.getProperty("mqtt.password");
       String clientCert = prop.getProperty("mqtt.clientcert");
       String privateKey = prop.getProperty("mqtt.privatekey");
-      lis.connectSSL(username, password, clientCert, privateKey);
+      lis.connect(SSLUtils.loadMqttConnectOptions(username, password, clientCert, privateKey));
     } else {
       lis.connect();
     }

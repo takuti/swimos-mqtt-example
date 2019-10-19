@@ -1,5 +1,7 @@
 package swim.basic.mqtt.ssl;
 
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.DataInputStream;
@@ -56,6 +58,18 @@ public class SSLUtils {
         context.init(kmf.getKeyManagers(), null, null);
 
         return context;
+    }
+
+    public static MqttConnectOptions loadMqttConnectOptions(final String username, final String password, final String clientCertFilename, final String privateKeyFilename) throws IOException, GeneralSecurityException {
+        MqttConnectOptions connOpts = new MqttConnectOptions();
+        connOpts.setCleanSession(true);
+
+        SSLContext context = loadSSLContext(clientCertFilename, privateKeyFilename);
+        connOpts.setSocketFactory(context.getSocketFactory());
+        connOpts.setUserName(username);
+        connOpts.setPassword(password.toCharArray());
+
+        return connOpts;
     }
 
 }
