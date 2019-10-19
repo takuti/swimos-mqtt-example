@@ -90,8 +90,8 @@ public class IngressBridge {
     System.out.println("Connected!");
   }
 
-  public void listen() throws MqttException {
-    this.mqtt.subscribe("swimSensors/all", 1);
+  public void listen(final String topic) throws MqttException {
+    this.mqtt.subscribe(topic, 1);
   }
 
   public static void main(String[] args) throws MqttException, GeneralSecurityException, IOException {
@@ -113,6 +113,6 @@ public class IngressBridge {
     } else {
       lis.connect();
     }
-    lis.listen();
+    lis.listen(prop.getProperty("mqtt.topic"));
   }
 }

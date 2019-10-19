@@ -54,9 +54,8 @@ public class DataSourcePopulator {
     System.out.println("Populator connected!");
   }
 
-  public void populate() {
+  public void populate(final String topic) {
     final int qos = 1;
-    final String topic = "swimSensors/all";
     int count = 0;
     while (true) {
       for (int i = 0; i < 10; i++) {
@@ -92,6 +91,6 @@ public class DataSourcePopulator {
     } else {
       pop = new DataSourcePopulator(broker);
     }
-    pop.populate();
+    pop.populate(prop.getProperty("mqtt.topic"));
   }
 }
