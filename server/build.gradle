@@ -35,6 +35,8 @@ dependencies {
   api group: 'org.swimos', name: 'swim-server', version: version
   api group: 'org.swimos', name: 'swim-client', version: version
   api group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.0.2'
+  // JAX-B dependencies for JDK 9+
+  implementation "javax.xml.bind:jaxb-api:2.3.1"
 }
 
 task runMqtt(type: JavaExec) {

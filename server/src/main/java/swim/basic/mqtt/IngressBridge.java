@@ -20,9 +20,16 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import swim.basic.mqtt.ssl.SSLUtils;
 import swim.client.ClientRuntime;
 import swim.recon.Recon;
 import swim.structure.Value;
+
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.Properties;
 
 public class IngressBridge {
 
@@ -59,18 +66,53 @@ public class IngressBridge {
     });
   }
 
-  public void listen() throws MqttException {
+  public void connect() throws MqttException {
     MqttConnectOptions connOpts = new MqttConnectOptions();
     connOpts.setCleanSession(true);
     this.mqtt.connect(connOpts);
     // Spin until connected
     while (!this.mqtt.isConnected()) { }
     System.out.println("Connected!");
+  }
+
+  public void connectSSL(String username, String password, String clientCert, String privateKey) throws MqttException, GeneralSecurityException, IOException {
+    SSLContext context = SSLUtils.loadSSLContext(clientCert, privateKey);
+
+    MqttConnectOptions connOpts = new MqttConnectOptions();
+    connOpts.setCleanSession(true);
+    connOpts.setSocketFactory(context.getSocketFactory());
+    connOpts.setUserName(username);
+    connOpts.setPassword(password.toCharArray());
+
+    this.mqtt.connect(connOpts);
+    // Spin until connected
+    while (!this.mqtt.isConnected()) { }
+    System.out.println("Connected!");
+  }
+
+  public void listen() throws MqttException {
     this.mqtt.subscribe("swimSensors/all", 1);
   }
 
-  public static void main(String[] args) throws MqttException {
-    final IngressBridge lis = new IngressBridge("warp://localhost:9001", "tcp://localhost:1883");
+  public static void main(String[] args) throws MqttException, GeneralSecurityException, IOException {
+    String swimHost = "warp://localhost:9001";
+
+    InputStream in = DataSourcePopulator.class.getClassLoader().getResourceAsStream("config.properties");
+    Properties prop = new Properties();
+    prop.load(in);
+    String broker = prop.getProperty("mqtt.broker");
+
+    final IngressBridge lis = new IngressBridge(swimHost, broker);
+
+    if (broker.startsWith("ssl://")) {
+      String username = prop.getProperty("mqtt.username");
+      String password = prop.getProperty("mqtt.password");
+      String clientCert = prop.getProperty("mqtt.clientcert");
+      String privateKey = prop.getProperty("mqtt.privatekey");
+      lis.connectSSL(username, password, clientCert, privateKey);
+    } else {
+      lis.connect();
+    }
     lis.listen();
   }
 }
